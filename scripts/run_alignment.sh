@@ -5,8 +5,8 @@ set -euo pipefail
 PROJECT_DIR="."
 REF_DIR="./data"
 REF_NAME="combined_reference.fa"
-READS1="$REF_DIR/SRR2584863_1.fastq"
-READS2="$REF_DIR/SRR2584863_2.fastq"
+READS1="$REF_DIR/SRR13269374_1.fastq.gz"
+READS2="$REF_DIR/SRR13269374_2.fastq.gz"
 THREADS=4
 
 # Output
