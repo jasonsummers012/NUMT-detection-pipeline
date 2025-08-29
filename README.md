@@ -70,8 +70,8 @@ Run the alignment script to generate sorted BAM files:
 bash
 chmod +x run_alignment.sh
 ./run_alignment.sh
-This script will:
 
+This script will:
 Index the reference genome (if not already done)
 Align paired-end reads using BWA MEM
 Convert SAM to BAM format
@@ -85,19 +85,19 @@ Filters reads based on mapping quality (MAPQ ≥ 30)
 Identifies discordant read pairs (nuclear-mitochondrial pairs)
 Exports NUMT candidates to CSV
 
-2. Candidate Clustering (02_candidate_clustering.ipynb)
+3. Candidate Clustering (02_candidate_clustering.ipynb)
 Groups nearby NUMT candidates into 500bp bins
 Filters clusters requiring minimum 2 reads per cluster
 Visualizes cluster distribution across chromosomes
 Exports filtered clusters to CSV
 
-3. Split Read Identification (03_split_read_identification.ipynb)
+4. Split Read Identification (03_split_read_identification.ipynb)
 Extracts soft-clipped sequences from reads in NUMT regions
 Generates FASTQ file of clipped sequences
 Aligns clipped sequences to mitochondrial reference
 Creates sorted BAM of clipped vs mtDNA alignments
 
-4. Split Read Counting (04_split_read_counting.ipynb)
+5. Split Read Counting (04_split_read_counting.ipynb)
 Counts split reads that align to mitochondrial DNA for each cluster
 Applies final filtering (minimum 5 split reads per cluster)
 Exports confirmed NUMT clusters
@@ -158,3 +158,4 @@ Consider filtering by chromosome to reduce memory usage
 Version History
 
 v1.0 - Initial release with complete NUMT detection pipeline
+
