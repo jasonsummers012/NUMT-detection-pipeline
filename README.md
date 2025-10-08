@@ -157,7 +157,7 @@ License
 MIT License - feel free to use and modify for your research.
 Contact
 For questions or issues, please open an issue on GitHub or contact [your email].
-[Your Name]. (2025). NUMT Detection Pipeline.
+[Jason Summers]. (2025). NUMT Detection Pipeline.
 GitHub: https://github.com/jasonsummers012/NUMT-detection-pipeline
 Acknowledgments
 Pipeline developed for genomic analysis of nuclear mitochondrial insertions
