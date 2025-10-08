@@ -136,7 +136,7 @@ The comprehensive figure includes:
 
 Top NUMT candidates were manually validated using IGV (Integrative Genomics Viewer):
 
-![IGV Validation](results/IGV_chr12_top_NUMT.png)
+![IGV Validation](validation/top_numt_candidate.png)
 
 Visual inspection confirms:
 - Clear junction breakpoint with clustered soft-clipped reads
@@ -222,7 +222,7 @@ MIT License - feel free to use and modify for your research.
 
 ## Contact
 
-For questions or issues, please open an issue on GitHub or contact [your email].
+For questions or issues, please open an issue on GitHub or contact [jasonsummers012@gmail.com].
 
 ## Acknowledgments
 
