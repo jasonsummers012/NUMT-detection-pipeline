@@ -1,161 +1,177 @@
 NUMT Detection Pipeline
-A bioinformatics pipeline for detecting Nuclear Mitochondrial DNA segments (NUMTs) from paired-end sequencing data. This project identifies mitochondrial DNA sequences that have been integrated into the nuclear genome by analyzing discordant read pairs and split reads.
+A comprehensive bioinformatics pipeline for identifying Nuclear Mitochondrial DNA segments (NUMTs) in human genomic data using paired-end sequencing reads.
 
 Overview
+NUMTs (Nuclear Mitochondrial DNA segments) are fragments of mitochondrial DNA that have been inserted into the nuclear genome. This pipeline detects NUMT insertions by identifying:
 
-Nuclear Mitochondrial DNA segments (NUMTs) are sequences of mitochondrial origin that have been inserted into the nuclear genome during evolution. This pipeline uses a multi-step approach to identify NUMT candidates from BAM alignment files by:
-
-1. Initial filtering - Identifying high-quality read pairs where one read maps to nuclear DNA and its mate maps to mitochondrial DNA
-2. Clustering - Grouping nearby NUMT candidates into clusters to reduce noise
-3. Split-read analysis - Extracting and analyzing soft-clipped sequences to confirm NUMT boundaries
-4. Validation - Confirming NUMT candidates by aligning split reads back to the mitochondrial reference
-
+Discordant read pairs - where one read maps to nuclear DNA and its mate maps to mitochondrial DNA
+Split reads - reads that span the nuclear-mitochondrial junction
+Pipeline Workflow
+BAM File → Filter Reads → Cluster Candidates → Extract Split Reads → Validate → Final NUMTs
+Step-by-Step Process
+BAM Parsing (01_bam_parsing_NUMT.ipynb)
+Filters high-quality reads (MAPQ ≥ 30)
+Identifies discordant nuclear-mitochondrial read pairs
+Output: 1,917 candidate reads
+Candidate Clustering (02_candidate_clustering.ipynb)
+Groups reads into 500bp genomic bins
+Filters clusters with ≥2 supporting reads
+Output: 184 candidate clusters
+Split-Read Identification (03_split_read_identification.ipynb)
+Extracts soft-clipped sequences from cluster regions
+Realigns clipped sequences to mitochondrial reference genome
+Identifies reads spanning nuclear-MT junctions
+Split-Read Counting (04_split_read_counting.ipynb)
+Counts validated split reads per cluster
+Filters clusters with ≥5 confirmed split reads
+Output: 88 high-confidence NUMT candidates
+Data Visualization (05_data_visualization.ipynb)
+Generates comprehensive multi-panel figure
+Shows genome-wide distribution, confidence metrics, and top candidates
 Requirements
-
-Software Dependencies
-
-Python 3.9+ with the following packages:
-pysam - BAM/SAM file manipulation
-pandas - Data analysis and manipulation
-matplotlib - Plotting and visualization
-seaborn - Statistical data visualization
-bwa - Burrows-Wheeler Aligner for sequence alignment
-samtools - SAM/BAM file utilities
-
-Data Requirements
-
-Paired-end FASTQ files (e.g., SRR13269374_1.fastq, SRR13269374_2.fastq)
-Combined reference genome (nuclear + mitochondrial)
-Human mitochondrial DNA reference (human_mtDNA.fa)
-
+Software
+Python 3.9+
+BWA (Burrows-Wheeler Aligner)
+SAMtools
+Jupyter Notebook
+Python Packages
+bash
+conda install pandas numpy matplotlib seaborn
+conda install -c bioconda pysam
 Installation
+bash
+# Clone the repository
+git clone https://github.com/jasonsummers012/NUMT-detection-pipeline.git
+cd NUMT-detection-pipeline
 
-1. Clone this repository:
-bash
-git clone <github.com/jasonsummers012/NUMT-detection-pipeline>
-cd numt-detection-pipeline
-2. Create and activate a conda environment:
-bash
+# Create conda environment
 conda create -n bioinfo_env python=3.9
 conda activate bioinfo_env
-3. Install Python dependencies:
-bash
-pip install pysam pandas matplotlib seaborn
-4. Install bioinformatics tools:
-bash
-conda install -c bioconda bwa
-conda install -c bioconda samtools
 
+# Install dependencies
+conda install pandas numpy matplotlib seaborn
+conda install -c bioconda pysam bwa samtools
+Usage
+1. Prepare Reference Genome
+Create a combined reference with both nuclear and mitochondrial genomes:
+
+bash
+cat hg38.fa human_mtDNA.fa > data/combined_reference.fa
+2. Run Alignment
+bash
+bash run_alignment.sh
+This script:
+
+Indexes the reference genome
+Aligns paired-end reads with BWA MEM
+Converts to sorted BAM with index
+3. Run NUMT Detection Pipeline
+Execute notebooks in order:
+
+bash
+jupyter notebook
+Open and run:
+
+01_bam_parsing_NUMT.ipynb
+02_candidate_clustering.ipynb
+03_split_read_identification.ipynb
+04_split_read_counting.ipynb
+05_data_visualization.ipynb
+Results
+Summary Statistics
+88 confirmed NUMT candidates identified
+44 high-confidence NUMTs (≥10 split reads)
+Top candidate: chr12:51,346,632 with 149 split reads
+Output Files
+File	Description
+NUMT_candidates.csv	Initial discordant read pairs (1,917 reads)
+filtered_NUMT_candidates.csv	Clustered candidates (184 clusters)
+confirmed_NUMT_clusters.csv	Final validated NUMTs (88 clusters)
+NUMT_comprehensive_analysis.png/pdf	Multi-panel visualization figure
+Visualization
+Show Image
+
+The comprehensive figure includes:
+
+Panel A: Genome-wide NUMT distribution across chromosomes
+Panel B: Confidence scoring (split reads vs total reads)
+Panel C: Mitochondrial origin map (which MT regions are inserted)
+Panel D: Read support distribution
+Panel E: Top 10 high-confidence NUMTs
+Manual Validation
+Top NUMT candidates were manually validated using IGV (Integrative Genomics Viewer):
+
+Show Image
+
+Visual inspection confirms:
+
+Clear junction breakpoint with clustered soft-clipped reads
+Discordant read pairs mapping to nuclear and mitochondrial genomes
+High mapping quality and consistent read support
 Directory Structure
-
-project/
-├── data/
-│   ├── SRR13269374_1.fastq          # Forward reads
-│   ├── SRR13269374_2.fastq          # Reverse reads
-│   ├── combined_reference.fa         # Nuclear + mitochondrial reference
-│   └── human_mtDNA.fa               # Mitochondrial reference only
-├── results/                         # Output directory (created automatically)
-├── notebooks/
+NUMT-detection-pipeline/
+├── data/                           # Reference genomes and input data
+│   ├── combined_reference.fa
+│   ├── human_mtDNA.fa
+│   └── SRR13269374_1/2.fastq
+├── results/                        # Pipeline outputs
+│   ├── sample_alignment_sorted.bam
+│   ├── NUMT_candidates.csv
+│   ├── confirmed_NUMT_clusters.csv
+│   └── NUMT_comprehensive_analysis.pdf
+├── notebooks/                      # Jupyter notebooks
 │   ├── 01_bam_parsing_NUMT.ipynb
 │   ├── 02_candidate_clustering.ipynb
 │   ├── 03_split_read_identification.ipynb
-│   └── 04_split_read_counting.ipynb
-└── run_alignment.sh                 # Initial alignment script
+│   ├── 04_split_read_counting.ipynb
+│   └── 05_data_visualization.ipynb
+├── run_alignment.sh               # Alignment script
+└── README.md
+Key Parameters
+Parameter	Value	Description
+MAPQ_THRESHOLD	30	Minimum mapping quality
+BIN_SIZE	500	Genomic bin size (bp)
+MIN_NUM_READS	2	Minimum reads per cluster
+MIN_CLIP_LEN	10	Minimum soft-clip length
+MIN_SPLIT_READS	5	Minimum split reads for confirmation
+Methods
+Quality Filters
+Mapping quality ≥ 30
+No unmapped reads
+No duplicates, QC failures, or secondary alignments
+Both reads in pair must be mapped
+NUMT Detection Strategy
+Identify discordant pairs where one read maps to nuclear genome (chr1-22, X, Y) and mate maps to mitochondrial genome
+Cluster discordant pairs into genomic bins (500bp windows)
+Extract soft-clipped sequences from cluster regions
+Realign clips to mitochondrial reference genome
+Count validated split reads per cluster
+Filter for high-confidence candidates (≥5 split reads)
+Validation
+NUMTs can be validated against known databases:
 
-Usage
+UCSC Genome Browser NumtS track
+Literature-based NUMT annotations
+Manual inspection with IGV
+Our top candidate (chr12:51,346,632) shows no overlap with known NUMT databases, suggesting it may be a novel insertion or population-specific variant.
 
-Step 1: Initial Alignment
-Run the alignment script to generate sorted BAM files:
-
-bash
-chmod +x run_alignment.sh
-./run_alignment.sh
-
-This script will:
-Index the reference genome (if not already done)
-Align paired-end reads using BWA MEM
-Convert SAM to BAM format
-Sort and index the BAM file
-
-Step 2: NUMT Detection Pipeline
-Execute the Jupyter notebooks in order:
-
-1. BAM Parsing (01_bam_parsing_NUMT.ipynb)
-Filters reads based on mapping quality (MAPQ ≥ 30)
-Identifies discordant read pairs (nuclear-mitochondrial pairs)
-Exports NUMT candidates to CSV
-
-3. Candidate Clustering (02_candidate_clustering.ipynb)
-Groups nearby NUMT candidates into 500bp bins
-Filters clusters requiring minimum 2 reads per cluster
-Visualizes cluster distribution across chromosomes
-Exports filtered clusters to CSV
-
-4. Split Read Identification (03_split_read_identification.ipynb)
-Extracts soft-clipped sequences from reads in NUMT regions
-Generates FASTQ file of clipped sequences
-Aligns clipped sequences to mitochondrial reference
-Creates sorted BAM of clipped vs mtDNA alignments
-
-5. Split Read Counting (04_split_read_counting.ipynb)
-Counts split reads that align to mitochondrial DNA for each cluster
-Applies final filtering (minimum 5 split reads per cluster)
-Exports confirmed NUMT clusters
-
-Parameters
-
-Key parameters that can be adjusted:
-
-MAPQ_THRESHOLD = 30 - Minimum mapping quality
-BIN_SIZE = 500 - Cluster bin size (bp)
-MIN_NUM_READS = 2 - Minimum reads per cluster
-MIN_CLIP_LEN = 10 - Minimum clipped sequence length
-MIN_SPLIT_READS = 5 - Minimum split reads for confirmation
-
-Output Files
-
-The pipeline generates several intermediate and final output files:
-
-NUMT_candidates.csv - Initial NUMT candidates
-filtered_NUMT_candidates.csv - Clustered and filtered candidates
-clipped_reads.fq - FASTQ of soft-clipped sequences
-clipped_reads_with_cluster.csv - Clipped reads with cluster assignments
-clipped_vs_mtDNA_sorted.bam - Alignment of clipped reads to mtDNA
-confirmed_NUMT_clusters.csv - Final confirmed NUMT locations
-
-Methodology
-
-This pipeline implements the approach described in "The Mighty NUMT: Mitochondrial DNA Flexing its Code in the Nuclear Genome" and uses:
-
-1. Discordant read pair analysis - Identifies read pairs where one mate maps to nuclear DNA and the other to mitochondrial DNA
-2. Spatial clustering - Groups nearby events to distinguish real NUMTs from random noise
-3. Split-read validation - Analyzes soft-clipped sequences to confirm NUMT boundaries and validate insertions
-
+Future Directions
+Compare against published NUMT databases for validation
+Estimate insertion sizes and breakpoint coordinates
+Identify gene disruptions or functional impacts
+Population-level analysis across multiple samples
 Citation
+If you use this pipeline, please cite:
 
-If you use this pipeline in your research, please cite the original methodology paper:
-"The Mighty NUMT: Mitochondrial DNA Flexing its Code in the Nuclear Genome"
+[Jason Summers]. (2025). NUMT Detection Pipeline. 
+GitHub: https://github.com/jasonsummers012/NUMT-detection-pipeline
+License
+MIT License - feel free to use and modify for your research.
 
 Contact
+For questions or issues, please open an issue on GitHub or contact [your email].
 
-Jason Summers
-jasonsummers012@gmail.com
-
-Troubleshooting
-
-Common Issues
-Memory errors: Large BAM files may require more memory. Consider processing chromosomes individually.
-Missing index files: Ensure all BAM files are properly indexed using samtools index.
-Reference format: Verify that chromosome naming is consistent between reference and BAM files.
-Path issues: Update file paths in notebooks if using different directory structure.
-
-Performance Tips
-
-Use multiple threads for BWA alignment (-t parameter)
-Index BAM files for faster random access
-Consider filtering by chromosome to reduce memory usage
-
-Version History
-
-v1.0 - Initial release with complete NUMT detection pipeline
-
+Acknowledgments
+Pipeline developed for genomic analysis of nuclear mitochondrial insertions
+Uses standard bioinformatics tools: BWA, SAMtools, pysam
+Visualization created with matplotlib and seaborn
